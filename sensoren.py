@@ -4,7 +4,7 @@ from collections import deque
 import statistics
 from simulation import k
 from regelung import motordrehzahl
-from environment import TESTMODUS
+from environment import TESTMODUS,steuerdaten
 import random
 
 
@@ -21,11 +21,17 @@ def auslesen_sensoren():
     global roh_b102
     try:
         if TESTMODUS:
-            randomfaktor = random.uniform(0.97,1.05)
-            roh_b102 = round((roh_b102 + (k* motordrehzahl))*randomfaktor,1)
-            if roh_b102 > 18500:
-                roh_b102 = 18500
-            #print (f"roh: {roh_b102}")
+            if steuerdaten['letzter_pumpenwert'] > 7000:
+                randomfaktor = random.uniform(0.97,1.05)
+                roh_b102 = round((roh_b102 + (k* motordrehzahl))*randomfaktor,1)
+                if roh_b102 > 18500:
+                    roh_b102 = 18500
+                #print (f"roh: {roh_b102}")
+            else:
+                randomfaktor = random.uniform(0.97,1.05)
+                roh_b102 = round((roh_b102 - 2 )*randomfaktor,1)
+                if roh_b102 < 11200:
+                    roh_b102 = 11200
         else:
             plc = snap7.client.Client()
             plc.connect(PLC_IP, RACK, SLOT)
@@ -40,6 +46,8 @@ def auslesen_sensoren():
             global rohwert_median
             rohwert_median = statistics.median(rohwert_puffer)
             #print(f"median{rohwert_median}")
+            if rohwert_median > 18500:
+                    rohwert_median = 18500
             
     except Exception as e:
         print(f"⚠️ Fehler in auslesen_sensoren(): {e}")
