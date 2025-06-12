@@ -18,11 +18,14 @@ def ansteuerung(sollwert_mm):
         else:
             pass
     else:
+
         if fuellstand < (sollwert_mm - hysterese):
             steuere_pumpe(plc, motordrehzahl)
         elif fuellstand > (sollwert_mm + hysterese):
             steuere_pumpe(plc, 0)
         else:
             pass
-    print(f"wird angesteuert{fuellstand}")
+        
+    
+    #print(f"wird angesteuert{fuellstand}")
     return steuerdaten["letzter_pumpenwert"] 

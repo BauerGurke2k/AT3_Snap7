@@ -2,26 +2,33 @@ from environment import steuerdaten,b101,b102
 
 
 
-k = 0.00001071 #Pumpenkonstante
+k = 0.022142857 #Pumpenkonstante
 zykluszeit = 1
+
+
 
 def simuliere_behaelter():
     from sensoren import rohwert_median
     from regelung import ansteuerung
-
+    letzter_fuellstand = 0
     
 
     pumpe_aktiv = steuerdaten["letzter_pumpenwert"] > 7000
     rueckfluss_aktiv = not pumpe_aktiv
 
     # Neue Umrechnung: 11000 → 20 mm, 18500 → 178 mm
-    skala = 158 / (18500 - 11000)
+    skala = (175-20)/(18000-11000)
     fuellstand_mm = (rohwert_median - 11000) * skala 
+    fuellstand_mm = (rohwert_median - 11000) * skala
 
+    
+    menge = k * steuerdaten["letzter_pumpenwert"]
+    letzter_fuellstand = fuellstand_mm  # Update für nächsten Zyklus
+    print(f"{fuellstand_mm},{letzter_fuellstand}")
 
 
     if pumpe_aktiv:
-        menge = fuellstand_mm
+        
         b101.entleeren(menge)
         b102.fuellen(menge)
 

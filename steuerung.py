@@ -3,6 +3,7 @@ from snap7.util import set_int
 from snap7.type import Areas
 from environment import TESTMODUS,steuerdaten
 
+
 class SPS:
     
     def __init__(self, ip='172.19.10.53', rack=0, slot=2):
@@ -20,8 +21,9 @@ class SPS:
             self.letzter_drehzahl = drehzahl
         else:
             data = bytearray(2)
-            set_int(data, 0, drehzahl)
-            self.client.write_area(Areas.DB, 1, 0, data)
+            set_int(data, 0, drehzahl)  # drehzahl ist int Wert
+            self.client.write_area(Areas.PA, 0, 3, data)  # QW3 ist bei Byte 6
+            
 
     def disconnect(self):
         self.client.disconnect()
