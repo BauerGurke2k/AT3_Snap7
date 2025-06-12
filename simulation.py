@@ -5,11 +5,11 @@ from environment import steuerdaten,b101,b102
 k = 0.00001071 #Pumpenkonstante
 zykluszeit = 1
 
-def simuliere_behaelter(sollwert_mm):
+def simuliere_behaelter():
     from sensoren import rohwert_median
     from regelung import ansteuerung
 
-    ansteuerung(sollwert_mm)
+    
 
     pumpe_aktiv = steuerdaten["letzter_pumpenwert"] > 7000
     rueckfluss_aktiv = not pumpe_aktiv

@@ -1,10 +1,11 @@
 import time
 import threading
+import schedule
 from steuerung import plc, beenden
 from sensoren import auslesen_sensoren,TESTMODUS
 from simulation import simuliere_behaelter
 from fuellstand_log import log_fuellstaende, plot_fuellstaende, reset_log,start_live_plot
-import schedule
+from regelung import ansteuerung
 from environment import steuerdaten
 
 def messzyklus(stop_event):
@@ -14,7 +15,8 @@ def messzyklus(stop_event):
         #print(f"sensoren lesen")
 
 def pumpenzyklus(sollwert_mm):
-    simuliere_behaelter(sollwert_mm)
+    simuliere_behaelter()
+    ansteuerung(sollwert_mm)
     log_fuellstaende()
 
 

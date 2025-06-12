@@ -22,14 +22,14 @@ def auslesen_sensoren():
     try:
         if TESTMODUS:
             if steuerdaten['letzter_pumpenwert'] > 7000:
-                randomfaktor = random.uniform(0.97,1.05)
-                roh_b102 = round((roh_b102 + (k* motordrehzahl))*randomfaktor,1)
+                randomfaktor = random.uniform(0.97,1.04)
+                roh_b102 = round((roh_b102 + (k* motordrehzahl)),1)
                 if roh_b102 > 18500:
                     roh_b102 = 18500
                 #print (f"roh: {roh_b102}")
             else:
                 randomfaktor = random.uniform(0.97,1.05)
-                roh_b102 = round((roh_b102 - 2 )*randomfaktor,1)
+                roh_b102 = round((roh_b102 - 2 ),1)
                 if roh_b102 < 11200:
                     roh_b102 = 11200
         else:
@@ -45,6 +45,7 @@ def auslesen_sensoren():
         if len(rohwert_puffer) >= 5:
             global rohwert_median
             rohwert_median = statistics.median(rohwert_puffer)
+            rohwert_median = rohwert_median * randomfaktor
             #print(f"median{rohwert_median}")
             if rohwert_median > 18500:
                     rohwert_median = 18500
