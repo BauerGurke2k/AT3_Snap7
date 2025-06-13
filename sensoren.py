@@ -2,8 +2,8 @@ import snap7
 from snap7.type import Areas
 from collections import deque
 import statistics
-from simulation import k
-from regelung import motordrehzahl
+from simulation import k,pumpenkonstante,abflusskonstante
+from regelung import motordrehzahl,max_pumpendrehzahl
 from environment import TESTMODUS,steuerdaten
 import random
 
@@ -14,26 +14,48 @@ SLOT = 2
 
 # Puffer für Median-Glättung
 rohwert_puffer = deque(maxlen=9)
-rohwert_median = None
-roh_b102 = 11200 
+rohwert_puffer_sim = deque(maxlen=9)
+median_mess = 11000
+median_sim = 11000
+roh_b102_simuliert = 11000 
+zykluszeit_mess = 0.2
+
 
 def auslesen_sensoren():
-    global roh_b102
+    global roh_b102_simuliert
     try:
+        global median_mess
+        global median_sim
         if TESTMODUS:
-            randomfaktor = random.uniform(0.97,1.04)
+            randomfaktor = random.uniform(0.999,1.001)
+            delta_sensorwert_sim =  (pumpenkonstante*(motordrehzahl/max_pumpendrehzahl)*zykluszeit_mess)
+            delta_abfluss_sim = abflusskonstante * zykluszeit_mess 
             if steuerdaten['letzter_pumpenwert'] > 7000:
                 
-                roh_b102 = round((roh_b102 + (k* motordrehzahl)),1)
-                roh_b102 = roh_b102 * randomfaktor
-                if roh_b102 > 18500:
-                    roh_b102 = 18500
-                #print (f"roh: {roh_b102}")
+
+                roh_b102_simuliert = round((roh_b102_simuliert + delta_sensorwert_sim) * randomfaktor, 1)
+               
+                if roh_b102_simuliert > 18500:
+                    roh_b102_simuliert = 18500
+                #print (f"roh: {roh_b102_simuliert}")
             else:
-                roh_b102 = round((roh_b102 - 2 ),1)
-                roh_b102 = roh_b102 * randomfaktor
-                if roh_b102 < 11200:
-                    roh_b102 = 11200
+                roh_b102_simuliert = round(((roh_b102_simuliert - delta_abfluss_sim)* randomfaktor ),1)
+                
+                if roh_b102_simuliert < 11000:
+                    roh_b102_simuliert = 11000
+                
+            
+            rohwert_puffer_sim.append(roh_b102_simuliert)
+            
+            if len(rohwert_puffer_sim) >= 5:
+                median_sim = statistics.median(rohwert_puffer_sim)
+
+                if median_sim > 18500:
+                    median_sim = 18500
+
+                print(f"medisim {median_sim}")
+                
+
         else:
             plc = snap7.client.Client()
             plc.connect(PLC_IP, RACK, SLOT)
@@ -41,17 +63,16 @@ def auslesen_sensoren():
             plc.disconnect()
             print (f"roh: {roh_b102}")
 
-        rohwert_puffer.append(roh_b102)
+            rohwert_puffer.append(roh_b102)
+        
 
-        # Median statt gleitendem Mittelwert
-        if len(rohwert_puffer) >= 5:
-            global rohwert_median
-            
-            rohwert_median = statistics.median(rohwert_puffer)
-            
-            print(f"median{rohwert_median}")
-            if rohwert_median > 18500:
-                    rohwert_median = 18500
-            
+            if len(rohwert_puffer) >= 5:
+
+                median_mess = statistics.median(rohwert_puffer)
+                print(f"medimess{median_mess}")
+                
+             
+
+
     except Exception as e:
         print(f"⚠️ Fehler in auslesen_sensoren(): {e}")

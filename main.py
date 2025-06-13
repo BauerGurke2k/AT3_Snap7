@@ -48,7 +48,7 @@ if __name__ == "__main__":
     plot_thread = threading.Thread(target=start_live_plot, daemon=True)
     plot_thread.start()
 
-    #schedule.every(1).seconds.do(pumpenzyklus, sollwert_mm)
+    schedule.every(1).seconds.do(pumpenzyklus, sollwert_mm)
 
     try:
         while True:

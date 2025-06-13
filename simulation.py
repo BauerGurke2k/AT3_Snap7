@@ -1,32 +1,44 @@
 from environment import steuerdaten,b101,b102
 
 
+pumpenkonstante = 174.175
+k = 0.022142857 #Sensorkalibrierung umrechnung sensorwert in mm
+zykluszeit_sim = 1
+abflusskonstante = 37.997
 
-k = 0.022142857 #Pumpenkonstante
-zykluszeit = 1
 
-
+rueckflussrate = None
+fuellstand_real = 0
+fuellstand_sim = 0
 
 def simuliere_behaelter():
-    from sensoren import rohwert_median
-    from regelung import ansteuerung
-    letzter_fuellstand = 0
+    from sensoren import median_mess,median_sim,zykluszeit_mess
+    from regelung import motordrehzahl,max_pumpendrehzahl
+
+    global fuellstand_real
+    global fuellstand_sim
+    global rueckflussrate
+
+    letzter_fuellstand_sim = 0
     
 
     pumpe_aktiv = steuerdaten["letzter_pumpenwert"] > 7000
     rueckfluss_aktiv = not pumpe_aktiv
 
     # Neue Umrechnung: 11000 → 20 mm, 18500 → 178 mm
-    skala = (175-20)/(18000-11000)
-    fuellstand_mm = (rohwert_median - 11000) * skala 
-    fuellstand_mm = (rohwert_median - 11000) * skala
+    skala = (b102.maxstand-b102.minstand)/(18000-11000)
+    fuellstand_real = (median_mess - 11000) * skala + 20
 
+#simulierten fülllstand berechnen
     
-    menge = k * steuerdaten["letzter_pumpenwert"]
-    letzter_fuellstand = fuellstand_mm  # Update für nächsten Zyklus
-    print(f"{fuellstand_mm},{letzter_fuellstand}")
 
+    fuellstand_sim = (median_sim - 11000) * skala +20
 
+    letzter_fuellstand_sim = fuellstand_sim
+
+    menge = pumpenkonstante * (motordrehzahl / max_pumpendrehzahl) * zykluszeit_sim * k
+    
+    print(f"{letzter_fuellstand_sim}, {fuellstand_sim},{menge}")
     if pumpe_aktiv:
         
         b101.entleeren(menge)
@@ -37,9 +49,9 @@ def simuliere_behaelter():
             druckfaktor = (b102.fuellstand - 20) / (178 - 20)
             rueckflussrate = 0.4 + druckfaktor * 1.2
         else:
-            rueckflussrate = 5
+            rueckflussrate = abflusskonstante * k * zykluszeit_sim
 
-        rueckfluss = rueckflussrate * zykluszeit
+        rueckfluss = rueckflussrate * zykluszeit_sim
         b101.fuellen(rueckfluss)
         b102.entleeren(rueckfluss)
 
@@ -50,6 +62,6 @@ def simuliere_behaelter():
 
     print(b101)
     print(b102)
-    print(f"{steuerdaten['letzter_pumpenwert'], rohwert_median}")
+    print(f"sim{fuellstand_sim},real{fuellstand_real}")
 
 

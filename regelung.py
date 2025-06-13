@@ -1,28 +1,34 @@
 from steuerung import steuere_pumpe, plc
 from environment import b102
 from environment import TESTMODUS,steuerdaten
-
+#from simulation import fuellstand_real,fuellstand_sim
+import simulation
 
 motordrehzahl = 24000
-
+max_pumpendrehzahl = 28000
 
 def ansteuerung(sollwert_mm):
-    fuellstand = b102.fuellstand
+    
     global motordrehzahl
     hysterese = 20
     if TESTMODUS:
-        if fuellstand < (sollwert_mm - hysterese):
+        if b102.fuellstand < (sollwert_mm - hysterese):
             steuerdaten["letzter_pumpenwert"] = motordrehzahl 
-        elif fuellstand > (sollwert_mm + hysterese):
+            print(f"fuellstand in regl{simulation.fuellstand_sim},{steuerdaten["letzter_pumpenwert"]}")
+        elif b102.fuellstand > (sollwert_mm + hysterese):
             steuerdaten["letzter_pumpenwert"] = 0
+            print(f"fuellstand in regl{simulation.fuellstand_sim},{steuerdaten["letzter_pumpenwert"]}")
+
         else:
             pass
     else:
 
-        if fuellstand < (sollwert_mm - hysterese):
+        if simulation.fuellstand_real < (sollwert_mm - hysterese):
             steuere_pumpe(plc, motordrehzahl)
-        elif fuellstand > (sollwert_mm + hysterese):
+
+        elif simulation.fuellstand_real > (sollwert_mm + hysterese):
             steuere_pumpe(plc, 0)
+
         else:
             pass
         
