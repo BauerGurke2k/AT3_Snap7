@@ -49,3 +49,10 @@ def testlauf():
 
 if __name__ == "__main__":
     testlauf()
+
+
+
+"""    
+    fuellstand_sim = (median_sim - 11000) * skala +20
+
+    letzter_fuellstand_sim = fuellstand_sim"""

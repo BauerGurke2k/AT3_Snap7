@@ -26,7 +26,57 @@ def auslesen_sensoren():
     try:
         global median_mess
         global median_sim
-        if TESTMODUS:
+        randomfaktor = random.uniform(0.999,1.001)
+        delta_sensorwert_sim =  (pumpenkonstante*(motordrehzahl/max_pumpendrehzahl)*zykluszeit_mess)
+        delta_abfluss_sim = abflusskonstante * zykluszeit_mess 
+
+        if TESTMODUS == False:
+            
+
+
+            plc = snap7.client.Client()
+            plc.connect(PLC_IP, RACK, SLOT)
+            roh_b102 = int.from_bytes(plc.read_area(Areas.PE, 0, 3, 2), 'big', signed=True)
+            plc.disconnect()
+            #print (f"roh: {roh_b102}")
+
+            rohwert_puffer.append(roh_b102)
+        
+
+            if len(rohwert_puffer) >= 5:
+
+                median_mess = statistics.median(rohwert_puffer)
+                print(f"medimess{median_mess}")
+            
+            
+
+            if steuerdaten['letzter_pumpenwert'] > 7000:
+                
+
+                roh_b102_simuliert = round((roh_b102_simuliert + delta_sensorwert_sim) * randomfaktor, 1)
+               
+                if roh_b102_simuliert > 18500:
+                    roh_b102_simuliert = 18500
+                #print (f"roh: {roh_b102_simuliert}")
+            else:
+                roh_b102_simuliert = round(((roh_b102_simuliert - delta_abfluss_sim)* randomfaktor ),1)
+                
+                if roh_b102_simuliert < 11000:
+                    roh_b102_simuliert = 11000
+                
+            
+            rohwert_puffer_sim.append(roh_b102_simuliert)
+            
+            if len(rohwert_puffer_sim) >= 5:
+                median_sim = statistics.median(rohwert_puffer_sim)
+
+                if median_sim > 18500:
+                    median_sim = 18500
+
+                print(f"medisim {median_sim}")
+
+        else:
+
             randomfaktor = random.uniform(0.999,1.001)
             delta_sensorwert_sim =  (pumpenkonstante*(motordrehzahl/max_pumpendrehzahl)*zykluszeit_mess)
             delta_abfluss_sim = abflusskonstante * zykluszeit_mess 
@@ -54,22 +104,10 @@ def auslesen_sensoren():
                     median_sim = 18500
 
                 print(f"medisim {median_sim}")
-                
 
-        else:
-            plc = snap7.client.Client()
-            plc.connect(PLC_IP, RACK, SLOT)
-            roh_b102 = int.from_bytes(plc.read_area(Areas.PE, 0, 3, 2), 'big', signed=True)
-            plc.disconnect()
-            print (f"roh: {roh_b102}")
 
-            rohwert_puffer.append(roh_b102)
-        
 
-            if len(rohwert_puffer) >= 5:
-
-                median_mess = statistics.median(rohwert_puffer)
-                print(f"medimess{median_mess}")
+            
                 
              
 

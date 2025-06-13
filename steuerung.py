@@ -16,13 +16,17 @@ class SPS:
         self.client.connect(self.ip, self.rack, self.slot)
 
     def write_drehzahl(self, drehzahl):
-        if TESTMODUS:
-            print(f"Simuliere Pumpendrehzahl: {drehzahl}")
-            self.letzter_drehzahl = drehzahl
-        else:
+        if TESTMODUS == False :
+
             data = bytearray(2)
             set_int(data, 0, drehzahl)  # drehzahl ist int Wert
             self.client.write_area(Areas.PA, 0, 3, data)  # QW3 ist bei Byte 6
+
+            print(f"Simuliere Pumpendrehzahl: {drehzahl}")
+            self.letzter_drehzahl = drehzahl
+        else:
+            print(f"Simuliere Pumpendrehzahl: {drehzahl}")
+            self.letzter_drehzahl = drehzahl
             
 
     def disconnect(self):

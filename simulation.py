@@ -1,7 +1,7 @@
 from environment import steuerdaten,b101,b102
 
 
-pumpenkonstante = 174.175
+pumpenkonstante = 175.175
 k = 0.022142857 #Sensorkalibrierung umrechnung sensorwert in mm
 zykluszeit_sim = 1
 abflusskonstante = 37.997
@@ -19,26 +19,24 @@ def simuliere_behaelter():
     global fuellstand_sim
     global rueckflussrate
 
-    letzter_fuellstand_sim = 0
+
     
 
     pumpe_aktiv = steuerdaten["letzter_pumpenwert"] > 7000
     rueckfluss_aktiv = not pumpe_aktiv
 
     # Neue Umrechnung: 11000 → 20 mm, 18500 → 178 mm
-    skala = (b102.maxstand-b102.minstand)/(18000-11000)
+    skala = (b102.maxstand-b102.minstand)/(18000-11500)
     fuellstand_real = (median_mess - 11000) * skala + 20
 
 #simulierten fülllstand berechnen
     
 
-    fuellstand_sim = (median_sim - 11000) * skala +20
 
-    letzter_fuellstand_sim = fuellstand_sim
 
     menge = pumpenkonstante * (motordrehzahl / max_pumpendrehzahl) * zykluszeit_sim * k
     
-    print(f"{letzter_fuellstand_sim}, {fuellstand_sim},{menge}")
+
     if pumpe_aktiv:
         
         b101.entleeren(menge)
