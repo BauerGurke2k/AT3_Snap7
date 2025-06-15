@@ -1,6 +1,6 @@
 
 
-TESTMODUS= False
+TESTMODUS= True
 
 
 class Behaelter:
