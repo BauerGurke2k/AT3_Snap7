@@ -35,7 +35,7 @@ def simuliere_behaelter():
 
 
     menge = pumpenkonstante * (motordrehzahl / max_pumpendrehzahl) * zykluszeit_sim * k
-    
+    test = (median_sim-11000) * k + b102.minstand
 
     if pumpe_aktiv:
         
@@ -61,5 +61,6 @@ def simuliere_behaelter():
     print(b101)
     print(b102)
     print(f"sim{fuellstand_sim},real{fuellstand_real}")
+    print(f"testrechnung{test}")
 
 

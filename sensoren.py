@@ -26,7 +26,7 @@ def auslesen_sensoren():
     try:
         global median_mess
         global median_sim
-        randomfaktor = random.uniform(0.999,1.001)
+        randomfaktor = random.uniform(0.98,1.03)
         delta_sensorwert_sim =  (pumpenkonstante*(motordrehzahl/max_pumpendrehzahl)*zykluszeit_mess)
         delta_abfluss_sim = abflusskonstante * zykluszeit_mess 
 
